@@ -4,6 +4,11 @@ var tasksToDoEl = document.querySelector("#tasks-to-do");
 var taskIdCounter = 0;
 // Add a variable to track the main html element by its id
 var pageContentEl = document.querySelector("#page-content");
+// adding variables for interaction with the select element within the created tasks
+var tasksInProgressEl = document.querySelector("#tasks-in-progress");
+var tasksCompleteEl = document.querySelector("#tasks-completed");
+
+
 
 var taskFormHandler = function (event) {
   event.preventDefault();
@@ -16,12 +21,22 @@ var taskFormHandler = function (event) {
   }
   formEl.reset();
 
-  var taskDataObj = {
-    'name': taskNameInput,
-    'type': taskTypeInput
-  };
-
-  createTaskEl(taskDataObj);
+  var isEdit = formEl.hasAttribute("data-task-id");
+  
+  // has data attribute, so get task id and call function to complete edit process
+  if (isEdit) {
+    var taskId = formEl.getAttribute("data-task-id");
+    completeEditTask(taskNameInput, taskTypeInput, taskId);
+  }
+  // no data attribute, so create object as normal and pass to createTaskEl function
+  else {
+    var taskDataObj = {
+      'name': taskNameInput,
+      'type': taskTypeInput
+    };
+  
+    createTaskEl(taskDataObj);
+  }
 };
 
 var createTaskEl = function(taskDataObj) {
@@ -131,11 +146,50 @@ var editTask = function(taskId) {
   document.querySelector("select[name='task-type']").value = taskType;
 
   document.querySelector("#save-task").textContent = "Save Task";
-
+  // gives the form Element an attribute equal to the taskId
   formEl.setAttribute("data-task-id", taskId);
 }
+
+// function that will allow the edit task to be completed
+var completeEditTask = function(taskName, taskType, taskId) {
+  // find the matching task list item
+  var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+
+  // set new values
+  taskSelected.querySelector("h3.task-name").textContent = taskName;
+  taskSelected.querySelector("span.task-type").textContent = taskType;
+
+  alert("Task Updated!");
+  // Removes task id from form element and changes button back to Add Task, allows for tasks to be created again.
+  formEl.removeAttribute("data-task-id");
+  document.querySelector("#save-task").textContent = "Add Task";
+}
+
+var taskStatusChangeHandler = function(event) {
+   // get the task item's id
+   var taskId = event.target.getAttribute("data-task-id");
+
+   // get the currently selected option's value and convert to lowercase
+   var statusValue = event.target.value.toLowerCase();
+ 
+   // find the parent task item element based on the id
+   var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+
+  // move the task to the appropriate kanban section
+  if (statusValue === "to do") {
+    tasksToDoEl.appendChild(taskSelected);
+  }
+  else if (statusValue === "in progress") {
+    tasksInProgressEl.appendChild(taskSelected);
+  }
+  else if (statusValue === "completed") {
+    tasksCompleteEl.appendChild(taskSelected);
+  }
+};
 
 // add event listener to the form element
 formEl.addEventListener("submit", taskFormHandler);
 // add event listener to the main element
 pageContentEl.addEventListener("click", taskButtonHandler);
+// add event listener for changes to the main element of the form
+pageContentEl.addEventListener("change", taskStatusChangeHandler);
