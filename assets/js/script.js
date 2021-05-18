@@ -66,6 +66,9 @@ var createTaskEl = function(taskDataObj) {
   // pushes the taskDataObj into the tasks array
   tasks.push(taskDataObj);
 
+  // saves the new array to local storage
+  saveTasks();
+
   // add entire list item to list
   tasksToDoEl.appendChild(listItemEl);
 
@@ -152,6 +155,7 @@ var deleteTask = function(taskId) {
 
   // reassign tasks array to be the same as updatedTaskArr
   tasks = updateTaskArr;
+  saveTasks();
 }
 // add an edit task function
 var editTask = function(taskId) {
@@ -188,6 +192,8 @@ var completeEditTask = function(taskName, taskType, taskId) {
     }
   };
 
+  saveTasks();
+
   alert("Task Updated!");
   // Removes task id from form element and changes button back to Add Task, allows for tasks to be created again.
   formEl.removeAttribute("data-task-id");
@@ -222,7 +228,12 @@ var taskStatusChangeHandler = function(event) {
     }
   }
 
+  saveTasks();
 };
+// creating a function to save tasks
+var saveTasks = function() {
+  localStorage.setItem("tasks", JSON.stringify(tasks));
+}
 
 // add event listener to the form element
 formEl.addEventListener("submit", taskFormHandler);
