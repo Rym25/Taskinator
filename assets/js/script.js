@@ -234,7 +234,49 @@ var taskStatusChangeHandler = function(event) {
 var saveTasks = function() {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 }
-
+// creating a function to load data from local storage
+var loadTasks = function() {
+  // Add a loadTasks Function that parses the fetched task data
+  tasks = JSON.parse(localStorage.getItem("tasks"));
+  // checks if the fetched task has null as its value and if so sets it to an empty array 
+  if (tasks === null) {
+    tasks = [];
+    return false;
+  }
+  // Print saved tasks to the page
+  for (var i = 0; i < tasks.length; i++) {
+    // sets id of the current task to the id of the taskIdCounter
+    tasks[i].id = taskIdCounter;
+    // creates a new list item and gives it a class
+    var listItemEl = document.createElement("li");
+    listItemEl.className = "task-item";
+    // sets the new list items attribute
+    listItemEl.setAttribute("data-task-id", tasks[i].id);
+    // create a div element
+    var taskInfoEl = document.createElement("div");
+    taskInfoEl.className = "task-info";
+    taskInfoEl.innerHTML = "<h3 class='task-name'>" + tasks[i].name + "</h3><span class='task-type'>" + tasks[i].type + "</span>";
+    // append the div to the li
+    listItemEl.appendChild(taskInfoEl);
+    // create actions for the task and  append it to the li
+    var taskActionEl = createTaskAction(tasks[i].id);
+    listItemEl.appendChild(taskActionEl)
+    if (tasks[i].status === "to do"){
+      listItemEl.querySelector("select[name='status-change']").selectedIndex = 0;
+      tasksToDoEl.appendChild(listItemEl);
+    }
+    else if (tasks[i].status === "in progress") {
+      listItemEl.querySelector("select[name='status-change']").selectedIndex = 1;
+      tasksInProgressEl.appendChild(listItemEl);
+    }
+    else if (tasks[i].status === "completed") {
+      listItemEl.querySelector("select[name='status-change']").selectedIndex = 2;
+      tasksCompleteEl.appendChild(listItemEl);
+    }
+    taskIdCounter++;
+  }
+}
+loadTasks();
 // add event listener to the form element
 formEl.addEventListener("submit", taskFormHandler);
 // add event listener to the main element
